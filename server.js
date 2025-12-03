@@ -76,12 +76,50 @@ function createTables(){
         message TEXT)`);
 }
 
-const PORTING = process.env.PORT || 8080;
+/*const PORTING = process.env.PORT || 8080;
 
 createTables().then(() => {
     serversite.listen(PORTING, () => {
         console.log(`Сервер запущен на порту ${PORTING}`);
     });
-});
+});*/
+
+const PORT = process.env.PORT || 3000;
+
+async function startServer() {
+    try {
+        // Создаем таблицы
+        await createTables();
+        console.log('✅ Таблицы БД готовы');
+        
+        // Запускаем сервер
+        server.listen(PORT, () => {
+            console.log(`✅ Сервер запущен на порту: ${PORT}`);
+            console.log(`✅ URL: https://dsm-94vn.onrender.com`);
+            console.log(`✅ Режим: ${process.env.NODE_ENV || 'development'}`);
+            
+            // Проверка подключения к БД
+            postgre.query('SELECT 1')
+                .then(() => console.log('✅ База данных подключена'))
+                .catch(err => console.error('❌ Ошибка БД:', err.message));
+        });
+        
+        // Обработка ошибок сервера
+        server.on('error', (error) => {
+            console.error('❌ Ошибка сервера:', error.message);
+            if (error.code === 'EADDRINUSE') {
+                console.error(`Порт ${PORT} уже занят!`);
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Не удалось запустить сервер:', error.message);
+        process.exit(1);
+    }
+}
+
+// Запускаем сервер
+startServer();
+
 
 
