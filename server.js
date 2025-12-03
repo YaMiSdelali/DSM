@@ -79,8 +79,9 @@ function createTables(){
 const PORTING = process.env.PORT || 8080;
 
 createTables().then(() => {
-    serversite.listen(PORTING, '0.0.0.0', () => {
-        console.log('Сервер запущен');
+    serversite.listen(PORTING, () => {
+        console.log(`Сервер запущен на порту ${PORTING}`);
     });
 });
+
 
