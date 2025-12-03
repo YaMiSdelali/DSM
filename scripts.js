@@ -40,7 +40,7 @@ privacyCheckbox.addEventListener('change', () => {
 document.getElementById('contactForm').addEventListener('submit', (e) => {
     e.preventDefault();
     alert('Форма отправлена!');
-    fetch('http://localhost:8080/api/message',
+    fetch('https://kgeu-backend.onrender.com/api/message',
         {method: 'POST',
         headers: {'Content-Type':  'application/json'},
         body: JSON.stringify({
@@ -50,4 +50,5 @@ document.getElementById('contactForm').addEventListener('submit', (e) => {
         })
         }
     )
+
 });
