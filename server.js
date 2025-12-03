@@ -24,7 +24,7 @@ function DataBaseCreate(){
 function sendMail(form){
     return res.emails.send({
         from: 'onboarding@resend.dev',
-        to: process.env.ADMIN_EMAIL || 'ianova.oiu@kgeu.ru',
+        to: process.env.ADMIN_EMAIL || 'mertvyjmedved@gmail.com',
         subject: 'Новый вопрос с сайта ЦСМ',
         html: `Сообщение от: ${form.name}.
         ${form.message}
@@ -83,3 +83,4 @@ createTables().then(() => {
         console.log('Сервер запущен');
     });
 });
+
