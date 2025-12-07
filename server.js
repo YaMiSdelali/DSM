@@ -25,7 +25,7 @@ function DataBaseCreate() {
 function sendMail(form) {
     return resend.emails.send({
         from: 'onboarding@resend.dev',
-        to: process.env.ADMIN_EMAIL || '23853ap@gmail.com',
+        to: process.env.ADMIN_EMAIL || 'ianova.oiu@kgeu.ru',
         subject: 'Новый вопрос с сайта ЦСМ',
         html: `Сообщение от: ${form.name}.<br>${form.message}<br>Связаться можно через: ${form.contact}`
     })
@@ -145,6 +145,7 @@ createTables()
         console.error('Ошибка при создании таблиц:', error.message);
         process.exit(1);
     });
+
 
 
 
