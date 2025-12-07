@@ -134,7 +134,6 @@ const PORT = process.env.PORT || 3000;
 
 createTables()
     .then(() => {
-        console.log('Таблицы БД готовы');
         
         server.listen(PORT, () => {});
         
@@ -146,6 +145,7 @@ createTables()
         console.error('Ошибка при создании таблиц:', error.message);
         process.exit(1);
     });
+
 
 
 
