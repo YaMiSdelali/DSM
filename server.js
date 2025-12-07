@@ -23,38 +23,25 @@ function DataBaseCreate() {
 }
 
 function sendMail(form) {
-    console.log('📧 Отправка письма:', {
-        to: process.env.ADMIN_EMAIL || '23853ap@gmail.com',
-        hasApiKey: !!process.env.RESEND_API_KEY,
-        time: new Date().toISOString()
-    });
-    
     return resend.emails.send({
         from: 'onboarding@resend.dev',
         to: process.env.ADMIN_EMAIL || '23853ap@gmail.com',
         subject: 'Новый вопрос с сайта ЦСМ',
         html: `Сообщение от: ${form.name}.<br>${form.message}<br>Связаться можно через: ${form.contact}`
     })
-    .then(response => {
-        console.log('✅ Письмо отправлено успешно:', response.id);
-        return response;
-    })
+    .then(response => {})
     .catch(error => {
-        console.error('❌ Ошибка отправки письма:', error.message);
-        // Не прерываем выполнение, просто логируем
+        console.error('Ошибка отправки письма:', error.message);
         return null;
     });
 }
 
 const postgre = new pg.Pool(DataBaseCreate());
 
-// СОЗДАНИЕ СЕРВЕРА (обратите внимание на имя переменной)
 const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS, GET');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    
-    // Health check для Render (ОБЯЗАТЕЛЬНО)
     if (req.method === 'GET' && req.url === '/') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ 
@@ -64,42 +51,26 @@ const server = http.createServer((req, res) => {
         }));
         return;
     }
-    
     if (req.method === 'OPTIONS') {
         res.writeHead(200);
         res.end();
         return;
     }
-    
     if (req.method === 'POST' && req.url === '/api/message') {
     let body = '';
-    
     req.on('data', chunk => {
         body += chunk.toString();
-    });
-    
+    }); 
     req.on('end', async () => {
-        console.log('📨 Получен запрос. Длина body:', body.length, 'bytes');
-        
         try {
-            // Проверка на пустой body
             if (!body || body.trim() === '') {
                 throw new Error('Empty request body');
             }
-            
-            // Парсим JSON
             const data = JSON.parse(body);
-            console.log('📊 Парсинг JSON успешен:', { 
-                name: data.name?.substring(0, 20) + '...',
-                contact: data.contact?.substring(0, 20) + '...',
-                messageLength: data.message?.length || 0
-            });
             
             const { name, contact, message } = data;
-            
-            // Валидация
             if (!name || !contact || !message) {
-                console.error('❌ Не все поля заполнены:', { name: !!name, contact: !!contact, message: !!message });
+                console.error('Не все поля заполнены:', { name: !!name, contact: !!contact, message: !!message });
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ 
                     error: 'Все поля обязательны',
@@ -111,21 +82,12 @@ const server = http.createServer((req, res) => {
                 }));
                 return;
             }
-            
-            // Сохраняем в БД
-            console.log('💾 Сохранение в БД...');
             await postgre.query(
                 'INSERT INTO messinfo (name, contact, message) VALUES ($1, $2, $3)',
                 [name, contact, message]
             );
-            console.log('✅ Данные сохранены в БД');
             
-            // Отправляем email
-            console.log('📧 Отправка email...');
             const emailResult = await sendMail({ name, contact, message });
-            console.log('📧 Результат отправки email:', emailResult ? 'Успешно' : 'Ошибка');
-            
-            // Успешный ответ
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ 
                 success: true, 
@@ -134,7 +96,7 @@ const server = http.createServer((req, res) => {
             }));
             
         } catch (error) {
-            console.error('🔥 Ошибка обработки запроса:', {
+            console.error('Ошибка обработки запроса:', {
                 error: error.message,
                 bodyPreview: body.substring(0, 200),
                 url: req.url,
@@ -150,9 +112,8 @@ const server = http.createServer((req, res) => {
         }
     });
     
-    // Ошибка чтения запроса
     req.on('error', (err) => {
-        console.error('❌ Ошибка чтения запроса:', err.message);
+        console.error('Ошибка чтения запроса:', err.message);
     });
 } else {
         res.writeHead(404);
@@ -160,7 +121,6 @@ const server = http.createServer((req, res) => {
     }
 });
 
-// Функция создания таблиц
 function createTables() {
     return postgre.query(`
         CREATE TABLE IF NOT EXISTS messinfo(
@@ -170,26 +130,23 @@ function createTables() {
         )`);
 }
 
-// Запуск сервера
 const PORT = process.env.PORT || 3000;
 
 createTables()
     .then(() => {
-        console.log('✅ Таблицы БД готовы');
+        console.log('Таблицы БД готовы');
         
-        server.listen(PORT, () => {
-            console.log(`✅ Сервер запущен на порту ${PORT}`);
-            console.log(`✅ URL: https://dsm-94vn.onrender.com`);
-        });
+        server.listen(PORT, () => {});
         
         server.on('error', (error) => {
-            console.error('❌ Ошибка сервера:', error.message);
+            console.error('Ошибка сервера:', error.message);
         });
     })
     .catch(error => {
-        console.error('❌ Ошибка при создании таблиц:', error.message);
+        console.error('Ошибка при создании таблиц:', error.message);
         process.exit(1);
     });
+
 
 
 
